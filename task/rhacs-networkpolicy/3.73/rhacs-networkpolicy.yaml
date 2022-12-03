@@ -1,0 +1,98 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: rhacs-networkpolicy
+  labels:
+    app.kubernetes.io/version: "3.73"
+  annotations:
+    tekton.dev/tags: security
+    tekton.dev/categories: Security
+    tekton.dev/displayName: "Generate NetworkPolicy manifests with Red Hat Advanced Cluster Security"
+    tekton.dev/platforms: "linux/amd64"
+    tekton.dev/pipelines.minVersion: "0.18.0"
+spec:
+  description: >-
+    Generate NetworkPolicy manifests with Red Hat Advanced Cluster Security.
+
+    This tasks allows you to generate NetworkPolicy manifests for application manifests
+    using a technology preview feature of roxctl.
+    https://github.com/stackrox/stackrox/blob/master/roxctl/generate/README.md
+  params:
+    - name: rox_central_endpoint
+      type: string
+      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
+      default: rox-central-endpoint
+    - name: rox_api_token
+      type: string
+      description: Name of secret containing the RHACS StackRox API token with CI permissions.
+      default: rox-api-token
+    - name: rox_image
+      description: Image providing the roxctl tool.
+      default: quay.io/stackrox-io/roxctl:3.73.0
+    - name: manifests
+      type: string
+      description: |
+        Path to manifests to analyize and genereate NetworkPolicies for.
+        Examples: '$(workspaces.source.path)/k8s'
+      default: '$(workspaces.source.path)'
+    - name: output-file
+      type: string
+      description: |
+        Single file to store genereated NetworkPolicies in.
+        Examples: 'network-policy.yaml'
+      default: ''
+    - name: output-dir
+      type: string
+      description: |
+        Directory to store generated NetworkPolicies in. One policy per file.
+        Examples: '$(workspaces.source.path)'
+      default: '$(workspaces.source.path)'
+    - name: insecure-skip-tls-verify
+      type: string
+      description: |
+        Do not verify TLS certificates.
+
+        When set to "true", skip verifying the TLS certs of the Central endpoint and registry.
+      default: "false"
+  workspaces:
+    - name: source
+  results:
+    - name: networkpolicy_output
+      description: Output of `roxctl generate netpol`
+  steps:
+    - name: rox-generate-netpol
+      image: $(params.rox_image)
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: HOME
+          value: /tekton/home
+        - name: INSECURE
+          value: $(params.insecure-skip-tls-verify)
+        - name: MANIFESTS
+          value: $(params.manifests)
+        - name: OUTPUT_DIR
+          value: $(params.output-dir)
+        - name: OUTPUT_FILE
+          value: $(params.output-file)
+        - name: ROX_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: $(params.rox_api_token)
+              key: rox_api_token
+        - name: ROX_CENTRAL_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: $(params.rox_central_endpoint)
+              key: rox_central_endpoint
+
+      args:
+        - generate
+        - netpol 
+        - --endpoint=$(ROX_CENTRAL_ENDPOINT)
+        - --insecure-skip-tls-verify=$(INSECURE)
+      # TODO see README.md Known Issues
+      #  - --output-dir=$(OUTPUT_DIR)
+      #  - --output-file=$(OUTPUT_FILE)
+        - --fail
+        - $(MANIFESTS)
