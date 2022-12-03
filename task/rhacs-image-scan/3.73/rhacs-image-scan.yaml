@@ -4,7 +4,7 @@ kind: Task
 metadata:
   name: rhacs-image-scan
   labels:
-    app.kubernetes.io/version: "3.71"
+    app.kubernetes.io/version: "3.73"
   annotations:
     tekton.dev/tags: security
     tekton.dev/categories: Security
@@ -29,7 +29,7 @@ spec:
       default: rox-api-token
     - name: rox_image
       description: Image providing the roxctl tool.
-      default: quay.io/stackrox-io/roxctl:3.71.0
+      default: quay.io/stackrox-io/roxctl:3.73.0
     - name: image
       type: string
       description: |
