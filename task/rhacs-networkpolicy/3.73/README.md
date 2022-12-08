@@ -21,8 +21,7 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-networ
 
 - **`manifests`**: Directory holding deployment manifests. May be relative to workspace root or fully qualified. Examples: _"k8s"_
 - **`insecure-skip-tls-verify`**: Skip verification the TLS certs of the Central endpoint and registry. Examples: _"true", **"false"**_.
-- **`output_file`**: File to store generated policies in. Examples: _networkpolicy.yaml_ (optional)
-- **`output_dir`**: Directory to store generated policies in. Examples: _network-policies_ (optional)
+- **`networkpolicy-dir`**: Directory to store generated policies in. Example: _$(workspaces.source.path)/networkpolicies_
 - **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
 
@@ -32,7 +31,7 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-networ
 
 ## Usage
 
-Create secrets for authentication to RHACS Central endpoint and supply filesystem path to deployment manifest for checking.
+Create secrets for authentication to RHACS Central endpoint and supply filesystem path to deployment manifests for analysis.
 
 Run this task after checking out application manifest source code.
 
@@ -60,6 +59,8 @@ kubectl create secret generic rox-central-endpoint \
     params:
     - name: manifests
       value: $(workspaces.source.path)/k8s
+    - name: networkpolicy-dir
+      value: '$(workspaces.source.path)/networkpolicy'
     runAfter:
     - fetch-repository
 ```
@@ -73,10 +74,11 @@ kubectl create secret generic rox-central-endpoint \
 # Known Issues
 
 * Skipping TLS Verify is currently required. TLS trust bundle not working for quay.io etc.
-* Even with empty values, `--output-dir` and `--output-file` may not be supplied simultaneously. Given that the entrypoint for our container image is `/roxctl` and there is no `/bin/sh` this is problematic.
+* It is not strictly true that a endpoint and token are required to generate network policies. The generate command acts locally, and does not contact Central. I'm not yet aware if the product could change to require a connection later, so these values are currently required by this task for consistency with related tasks.
+* Even with empty values, `--output-dir` and `--output-file` may not be supplied simultaneously. This task takes the opinion that `--output-dir` is best and eschews other options for now.
   > _ERROR:    Flags [-d|--output-dir, -f|--output-file] cannot be used together_
-  * **TODO:** _RFE_ 
-    * Permit both flags simultaneously.
+  * **Possible RFE for roxctl:**
+    * Permit both `--output-dir` and `--output-file` flags  to exist simultaneously.
     * In case of _non-null_ values for both, `exit 1`
     * In case of _non-null_ values for one, write to that location
     * In case of _null_ values for both, write to `STDOUT`
