@@ -16,11 +16,12 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-deploy
 
 ## Parameters
 
-- **`deployment`**: Filename of deployment manifest. May be relative to workspace root or fully qualified. (example -- kustomize/overlays/dev/deployment.yaml)
+- **`deployment`**: Filename of deployment manifest. May be relative to workspace root or fully qualified. Examples: _kustomize/overlays/dev/deployment.yaml, **$(workspaces.source.path)/deployment.yaml**_
 - **`insecure-skip-tls-verify`**: Skip verification the TLS certs of the Central endpoint and registry. Examples: _"true", **"false"**_.
 - **`output_format`**:  Examples: _**table**, csv, json, junit_
-- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
+- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
+- **`rox_image`**: Container image providing `roxctl`. Examples: _**quay.io/stackrox-io/roxctl:3.73.0**, registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.73_
 ## Workspaces
 
 - **source**: A [Workspace](https://github.com/tektoncd/pipeline/blob/main/docs/workspaces.md) containing the deployment manifest.
@@ -51,13 +52,13 @@ kubectl create secret generic rox-central-endpoint \
       name: rhacs-deployment-check
       kind: Task
     workspaces:
-    - name: source
-      workspace: shared-workspace
+      - name: source
+        workspace: shared-workspace
     params:
-    - name: deployment
-      value: $(params.deployment)
+      - name: deployment
+        value: $(params.deployment)
     runAfter:
-    - fetch-repository
+      - fetch-repository
 ```
 
 **Samples:**
@@ -69,4 +70,8 @@ kubectl create secret generic rox-central-endpoint \
 # Known Issues
 
 * Skipping TLS Verify is currently required. TLS trust bundle not working for quay.io etc.
-* If the namespace value is not found in the deployment manifest any RHACS policies which are scoped to specific namespaces will not be matched.
+* If the namespace value is not found in the deployment manifest any RHACS policies which are scoped to specific namespaces will not be matched. [ROX-11350](https://issues.redhat.com/browse/ROX-11350)
+* Support for STDOUT captured as a Tekton result is limited, so results are only viewable in task pod logs.
+  * **Possible RFE for roxctl deployment check:**
+    * Add `--output-dir` and `--output-file` flags.
+

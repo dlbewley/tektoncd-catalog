@@ -1,12 +1,14 @@
 # Red Hat Advanced Cluster Security Image Scan Task
 
-Scan an image for vulnerabilities and metadata against RHACS build and deploy lifecycle policies to validate a pipeline run using `roxctl`.
+Scan a container image for vulnerabilities and metadata against RHACS build and deploy lifecycle policies to validate a pipeline run using `roxctl`.
 
 This tasks allows you to return full vulnerability scan results for an image in JSON, CSV, or Pretty format.  It's a companion to the rhacs-image-check task.
 
 ## Prerequisites
 
-This task requires an active installation of [Red Hat Advanced Cluster Security (RHACS)](https://www.redhat.com/en/resources/advanced-cluster-security-for-kubernetes-datasheet) or [StackRox](https://www.stackrox.io/).  It also requires configuration of secrets for the Central endpoint and an API token with at least CI privileges.
+This task requires an active installation of [Red Hat Advanced Cluster Security (RHACS)](https://www.redhat.com/en/resources/advanced-cluster-security-for-kubernetes-datasheet).  It also requires configuration of secrets for the Central endpoint and an API token with at least CI privileges.
+
+<https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes>
 
 ## Install the Task
 
@@ -16,11 +18,12 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-image-
 
 ## Parameters
 
-- **`image`**: Full name of image to scan. Examples: _gcr.io/rox/sample:5.0-rc1, **$(params.IMAGE)**, $(params.IMAGE)@$(tasks.buildah.results.IMAGE_DIGEST)_
+- **`image`**: Full name of image to scan. Include digest for ensure up to date results. Examples: _gcr.io/rox/sample:5.0-rc1, **$(params.IMAGE)**, $(params.IMAGE)@$(tasks.buildah.results.IMAGE_DIGEST)_
 - **`insecure-skip-tls-verify`**: Skip verification the TLS certs for Central endpoint and registry. Examples: _"true", **"false"**_.
 - **`output_format`**:  Examples: _**json**, csv, pretty_
-- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
+- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
+- **`rox_image`**: Container image providing `roxctl`. Examples: _**quay.io/stackrox-io/roxctl:3.73.0**, registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.73_
 
 ## Usage
 
@@ -49,7 +52,7 @@ kubectl create secret generic rox-central-endpoint \
           - name: image
             value: "$(params.IMAGE)@$(tasks.build-image.results.IMAGE_DIGEST)"
       runAfter:
-      - build-image
+        - build-image
 ```
 
 **Samples:**
@@ -69,4 +72,6 @@ kubectl create secret generic rox-central-endpoint \
   {"level":"fatal","ts":1659318163.069173,"caller":"entrypoint/entrypointer.go:188","msg":"Error while handling results: Termination message is above max allowed size 4096, caused by large task result.","stacktrace":"github.com/tektoncd/pipeline/pkg/entrypoint.Entrypointer.Go\n\t/opt/app-root/src/go/src/github.com/tektoncd/pipeline/pkg/entrypoint/entrypointer.go:188\nmain.main\n\t/opt/app-root/src/go/src/github.com/tektoncd/pipeline/cmd/entrypoint/main.go:154\nruntime.main\n\t/usr/lib/golang/src/runtime/proc.go:225"}
   ```
 
-* Version of roxctl should maintain compatibility with Central API. Maximum allowable version drift is unknown.
+* Support for STDOUT captured as a Tekton result is limited, so results are only viewable in task pod logs.
+  * **Possible RFE for roxctl image scan:**
+    * Add `--output-dir` and `--output-file` flags.

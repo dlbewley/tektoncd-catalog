@@ -22,8 +22,9 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-networ
 - **`manifests`**: Directory holding deployment manifests. May be relative to workspace root or fully qualified. Examples: _"k8s"_
 - **`insecure-skip-tls-verify`**: Skip verification the TLS certs of the Central endpoint and registry. Examples: _"true", **"false"**_.
 - **`networkpolicy-dir`**: Directory to store generated policies in. Example: _$(workspaces.source.path)/networkpolicies_
-- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
+- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
+- **`rox_image`**: Container image providing `roxctl`. Examples: _**quay.io/stackrox-io/roxctl:3.73.0**, registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.73_
 
 ## Workspaces
 
@@ -54,15 +55,15 @@ kubectl create secret generic rox-central-endpoint \
       name: rhacs-networkpolicy
       kind: Task
     workspaces:
-    - name: source
-      workspace: shared-workspace
+      - name: source
+        workspace: shared-workspace
     params:
-    - name: manifests
-      value: $(workspaces.source.path)/k8s
-    - name: networkpolicy-dir
-      value: '$(workspaces.source.path)/networkpolicy'
+      - name: manifests
+        value: $(workspaces.source.path)/k8s
+      - name: networkpolicy-dir
+        value: '$(workspaces.source.path)/networkpolicy'
     runAfter:
-    - fetch-repository
+      - fetch-repository
 ```
 
 **Samples:**

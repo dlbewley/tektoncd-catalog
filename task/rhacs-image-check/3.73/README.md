@@ -1,12 +1,14 @@
 # Red Hat Advanced Cluster Security Image Check Task
 
-Check an image against RHACS build and deploy lifecycle policies to validate a pipeline run using `roxctl`.
+Check a container image against RHACS build and deploy lifecycle policies to validate a pipeline run using `roxctl`.
 
-It's a companion to the rhacs-image-scan task, which returns full vulnerability scan results for an image.
+This task is a companion to the `rhacs-image-scan` task, which returns full vulnerability scan results for an image.
 
 ## Prerequisites
 
 This task requires an active installation of [Red Hat Advanced Cluster Security (RHACS)](https://www.redhat.com/en/resources/advanced-cluster-security-for-kubernetes-datasheet).  It also requires configuration of secrets for the Central endpoint and an API token with at least CI privileges.
+
+<https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes>
 
 ## Install the Task
 
@@ -19,8 +21,9 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-image-
 - **`image`**: Full name of image to scan. Examples: _gcr.io/rox/sample:5.0-rc1, **$(params.IMAGE)**, $(params.IMAGE)@$(tasks.buildah.results.IMAGE_DIGEST)_
 - **`insecure-skip-tls-verify`**: Skip verification the TLS certs for Central endpoint and registry. Examples: _"true", **"false"**_.
 - **`output_format`**:  Examples: _**table**, csv, json, junit_
-- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
+- **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
+- **`rox_image`**: Container image providing `roxctl`. Examples: _**quay.io/stackrox-io/roxctl:3.73.0**, registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.73_
 
 ## Usage
 
@@ -49,7 +52,7 @@ kubectl create secret generic rox-central-endpoint \
         - name: image
           value: "$(params.IMAGE)@$(tasks.build-image.results.IMAGE_DIGEST)"
       runAfter:
-      - image-scan
+        - image-scan
 ```
 
 **Samples:**
@@ -61,3 +64,6 @@ kubectl create secret generic rox-central-endpoint \
 # Known Issues
 
 * Skipping TLS Verify is currently required. TLS trust bundle not working for quay.io etc.
+* Support for STDOUT captured as a Tekton result is limited, so results are only viewable in task pod logs.
+  * **Possible RFE for roxctl image scan:**
+    * Add `--output-dir` and `--output-file` flags.
