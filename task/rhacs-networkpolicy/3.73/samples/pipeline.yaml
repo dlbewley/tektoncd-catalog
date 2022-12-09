@@ -3,7 +3,6 @@ kind: Pipeline
 metadata:
   name: rox-pipeline
 spec:
-
   workspaces:
     - name: shared-workspace
 
@@ -24,22 +23,23 @@ spec:
       default: '$(workspaces.source.path)'
 
   tasks:
+    # checkout source code
     - name: fetch-repository
       taskRef:
         name: git-clone
         kind: ClusterTask
       workspaces:
-      - name: output
-        workspace: shared-workspace
+        - name: output
+          workspace: shared-workspace
       params:
-      - name: url
-        value: $(params.git-url)
-      - name: subdirectory
-        value: ""
-      - name: deleteExisting
-        value: "true"
-      - name: revision
-        value: $(params.git-revision)
+        - name: url
+          value: $(params.git-url)
+        - name: subdirectory
+          value: ""
+        - name: deleteExisting
+          value: "true"
+        - name: revision
+          value: $(params.git-revision)
 
     # generate NetworkPolicies through static analysis
     - name: generate-networkpolicy
@@ -47,14 +47,14 @@ spec:
         name: rhacs-networkpolicy
         kind: Task
       workspaces:
-      - name: source
-        workspace: shared-workspace
+        - name: source
+          workspace: shared-workspace
       params:
-      - name: networkpolicy-dir
-        value: $(params.networkpolicy-dir)
-      - name: manifests
-        value: k8s
-      - name: insecure-skip-tls-verify
-        value: "true"
+        - name: networkpolicy-dir
+          value: $(params.networkpolicy-dir)
+        - name: manifests
+          value: k8s
+        - name: insecure-skip-tls-verify
+          value: "true"
       runAfter:
-      - fetch-repository
+        - fetch-repository
