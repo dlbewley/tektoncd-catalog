@@ -10,7 +10,7 @@ spec:
     - name: networkpolicy-dir
       type: string
       description: directory to hold generated networkpolicies
-      default: '$(workspaces.source.path)/networkpolicies'
+      default: '$(workspaces.source.path)/networkpolicy'
     - name: git-url
       type: string
       description: url of the git repo for the code of deployment
@@ -53,7 +53,7 @@ spec:
         - name: networkpolicy-dir
           value: $(params.networkpolicy-dir)
         - name: manifests
-          value: k8s
+          value: $(params.manifests)
         - name: insecure-skip-tls-verify
           value: "true"
       runAfter:

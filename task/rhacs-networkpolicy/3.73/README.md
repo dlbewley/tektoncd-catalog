@@ -2,6 +2,8 @@
 
 Generate suggested NetworkPolicy artifacts given source Kubernetes manifests using `roxctl`.
 
+See the [RHACS documentation](https://docs.openshift.com/acs/3.73/operating/manage-network-policies.html) for more detail.
+
 **This is a Technology Preview feature**
 Technology Preview features are not supported with Red Hat production service level agreements (SLAs) and might not be functionally complete. Red Hat does not recommend using them in production. These features provide early access to upcoming product features, enabling customers to test functionality and provide feedback during the development process. For more information about the support scope of Red Hat Technology Preview features, see <https://access.redhat.com/support/offerings/techpreview/>
 

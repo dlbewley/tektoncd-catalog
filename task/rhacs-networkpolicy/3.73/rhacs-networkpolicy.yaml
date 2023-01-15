@@ -15,19 +15,19 @@ spec:
   description: >-
     Generate NetworkPolicy manifests with Red Hat Advanced Cluster Security.
 
-    This tasks allows you to generate NetworkPolicy manifests for application manifests
+    This tasks allows you to generate NetworkPolicy manifests from application manifests
     using a technology preview feature of roxctl.
     https://github.com/stackrox/stackrox/blob/master/roxctl/generate/README.md
 
   params:
-    - name: rox_central_endpoint
-      type: string
-      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
-      default: rox-central-endpoint
     - name: rox_api_token
       type: string
       description: Name of secret containing the RHACS StackRox API token with CI permissions.
       default: rox-api-token
+    - name: rox_central_endpoint
+      type: string
+      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
+      default: rox-central-endpoint
     - name: rox_image
       description: Image providing the roxctl tool.
       default: quay.io/stackrox-io/roxctl:3.73.0
@@ -41,8 +41,8 @@ spec:
       type: string
       description: |
         Directory to store generated NetworkPolicies in. One policy per file.
-        Examples: '$(workspaces.source.path)/networkpolicies'
-      default: '$(workspaces.source.path)/networkpolicies'
+        Examples: '$(workspaces.source.path)/networkpolicy'
+      default: '$(workspaces.source.path)/networkpolicy'
     - name: insecure-skip-tls-verify
       type: string
       description: |

@@ -11,9 +11,11 @@ spec:
     - name: networkpolicy-dir
       value: '$(workspaces.source.path)/networkpolicy'
     - name: git-url
-      value: 'https://github.com/dlbewley/pipelines-vote-api.git'
+      value: 'https://github.com/GoogleCloudPlatform/microservices-demo.git'
+    - name: manifests
+      value: 'kubernetes-manifests'
     - name: git-revision
-      value: dev
+      value: main
     - name: insecure-skip-tls-verify
       value: "true"
 
