@@ -17,15 +17,16 @@ spec:
 
     This tasks allows you to check a Kubernetes deployment manifest against policies
     and apply enforcement to fail pipelines.
+
   params:
-    - name: rox_central_endpoint
-      type: string
-      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
-      default: rox-central-endpoint
     - name: rox_api_token
       type: string
       description: Name of secret containing the RHACS StackRox API token with CI permissions.
       default: rox-api-token
+    - name: rox_central_endpoint
+      type: string
+      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
+      default: rox-central-endpoint
     - name: rox_image
       description: Image providing the roxctl tool.
       default: quay.io/stackrox-io/roxctl:3.73.0
@@ -46,10 +47,18 @@ spec:
 
         When set to "true", skip verifying the TLS certs of the Central endpoint and registry.
       default: "false"
+    - name: send-notifications
+      type: string
+      description: |
+        Send notifications for violations.
+
+        Notifications will be sent to the notifiers attached to each violated policy.
+      default: "false"
+
   workspaces:
     - name: source
   results:
-    - name: check_output
+    - name: deployment_check_results
       description: Output of `roxctl deployment check`
   steps:
     - name: rox-deploy-check
@@ -81,3 +90,6 @@ spec:
         - --insecure-skip-tls-verify=$(INSECURE)
         - --output=$(OUTPUT)
         - --file=$(DEPLOYMENT)
+        - --send-notifications=$(SEND_NOTIFICATIONS)
+      stdoutConfig:
+        path: $(results.deployment_check_results.path)

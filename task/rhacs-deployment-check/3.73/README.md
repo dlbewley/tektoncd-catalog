@@ -21,6 +21,7 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-deploy
 - **`output_format`**:  Examples: _**table**, csv, json, junit_
 - **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
+- **`send-notifications`** Send notifications for violations.  Notifications will be sent to the notifiers attached to each violated policy. Default: _false_
 ## Workspaces
 
 - **source**: A [Workspace](https://github.com/tektoncd/pipeline/blob/main/docs/workspaces.md) containing the deployment manifest.
@@ -70,3 +71,5 @@ kubectl create secret generic rox-central-endpoint \
 
 * Skipping TLS Verify is currently required. TLS trust bundle not working for quay.io etc.
 * If the namespace value is not found in the deployment manifest any RHACS policies which are scoped to specific namespaces will not be matched.
+* Need the --send-notifications flag to accept false as a value.
+* StdoutConfig not available until at least pipelines 1.9

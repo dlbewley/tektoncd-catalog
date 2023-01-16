@@ -19,15 +19,16 @@ spec:
     and apply enforcement to fail builds.  It's a companion to the
     rhacs-image-scan task, which returns full vulnerability scan
     results for an image.
+
   params:
-    - name: rox_central_endpoint
-      type: string
-      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
-      default: rox-central-endpoint
     - name: rox_api_token
       type: string
       description: Name of secret containing the RHACS StackRox API token with CI permissions.
       default: rox-api-token
+    - name: rox_central_endpoint
+      type: string
+      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
+      default: rox-central-endpoint
     - name: rox_image
       description: Image providing the roxctl tool.
       default: quay.io/stackrox-io/roxctl:3.73.0
@@ -48,6 +49,14 @@ spec:
 
         When set to "true", skip verifying the TLS certs of the Central endpoint and registry.
       default: "false"
+    - name: send-notifications
+      type: string
+      description: |
+        Send notifications for violations.
+
+        Notifications will be sent to the notifiers attached to each violated policy.
+      default: "false"
+
   results:
     - name: check_output
       description: Output of `roxctl image check`
@@ -73,10 +82,13 @@ spec:
             secretKeyRef:
               name: $(params.rox_central_endpoint)
               key: rox_central_endpoint
+        - name: SEND_NOTIFICATIONS
+          value: $(params.send-notifications)
       args:
         - image
         - check
         - --endpoint=$(ROX_CENTRAL_ENDPOINT)
         - --insecure-skip-tls-verify=$(INSECURE)
-        - --output=$(OUTPUT)
         - --image=$(IMAGE)
+        - --output=$(OUTPUT)
+        - --send-notifications=$(SEND_NOTIFICATIONS)

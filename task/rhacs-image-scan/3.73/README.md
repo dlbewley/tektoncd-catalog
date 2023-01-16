@@ -75,3 +75,5 @@ kubectl create secret generic rox-central-endpoint \
 * Support for STDOUT captured as a Tekton result is limited, so results are only viewable in task pod logs.
   * **Possible RFE for roxctl image scan:**
     * Add `--output-dir` and `--output-file` flags.
+
+![../../../tekton-status.png](../../../tekton-status.png)

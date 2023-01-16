@@ -18,15 +18,16 @@ spec:
     This task allows you to return full vulnerability scan results for an image
     in CSV, Table, or JSON formats.
     The companion rhacs-image-check task checks an image against build-time policies.
+
   params:
-    - name: rox_central_endpoint
-      type: string
-      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
-      default: rox-central-endpoint
     - name: rox_api_token
       type: string
       description: Name of secret containing the RHACS StackRox API token with CI permissions.
       default: rox-api-token
+    - name: rox_central_endpoint
+      type: string
+      description: Name of secret containing the address:port tuple for RHACS Stackrox Central.
+      default: rox-central-endpoint
     - name: rox_image
       description: Image providing the roxctl tool.
       default: quay.io/stackrox-io/roxctl:3.73.0

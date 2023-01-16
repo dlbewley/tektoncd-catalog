@@ -24,6 +24,7 @@ kubectl apply -f https://api.hub.tekton.dev/v1/resource/tekton/task/rhacs-image-
 - **`rox_api_token`**: Secret containing the StackRox API token with CI permissions. Default: _**rox-api-token**_
 - **`rox_central_endpoint`**: Secret containing the address:port tuple for StackRox Central. Default: _**rox-central-endpoint**_
 - **`rox_image`**: Container image providing `roxctl`. Examples: _**quay.io/stackrox-io/roxctl:3.73.0**, registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8:3.73_
+- **`send-notifications`** Send notifications for violations.  Notifications will be sent to the notifiers attached to each violated policy. Default: _false_
 
 ## Usage
 
@@ -67,3 +68,4 @@ kubectl create secret generic rox-central-endpoint \
 * Support for STDOUT captured as a Tekton result is limited, so results are only viewable in task pod logs.
   * **Possible RFE for roxctl image scan:**
     * Add `--output-dir` and `--output-file` flags.
+* Need the --send-notifications flag to accept false as a value.
